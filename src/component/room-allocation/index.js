@@ -38,6 +38,7 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
     setAssigned(assignedPeople)
     onChange(assignedPeople)
   }, [rooms])
+
   return (
     <Box className={classes.container} >
       <Typography variant='h6'>
@@ -75,11 +76,11 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
                 <Typography variant='subtitle1'>{STRINGS['ROOM'].replace('[NUMBER]', total)}</Typography>
                 <Box className={classes.gridContainer}>
                   <Grid container>
-                    <Grid item md={6}>
+                    <Grid item xs={6} sm={6} md={6} >
                       <Typography variant='subtitle2' >{STRINGS['ADULT']}</Typography>
                       <Typography variant='caption'>{STRINGS['AGE_HINT']}</Typography>
                     </Grid>
-                    <Grid item md={6} className={classes.inputGrid}>
+                    <Grid item xs={6} sm={6} md={6}  className={classes.inputGrid}>
                       <CustomInputNumber
                         name={'room' + index}
                         value={room.adult}
@@ -92,10 +93,10 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
                     </Grid>
                   </Grid>
                   <Grid container>
-                    <Grid item md={6}>
+                    <Grid item xs={6} sm={6} md={6} >
                       <Typography variant='subtitle2'>{STRINGS['CHILDREN']}</Typography>
                     </Grid>
-                    <Grid item md={6} className={classes.inputGrid}>
+                    <Grid item xs={6} sm={6} md={6}  className={classes.inputGrid}>
                       <CustomInputNumber
                         name={'room' + index}
                         value={room.child}
@@ -118,11 +119,14 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
 
 const useStyle = makeStyles({
   container: {
-    minWidth: '50%'
+    display:'flex',
+    flexDirection:'column',
+    minWidth: '50%',
+    gap: '16px'
   },
   list: {
     display: 'flex',
-    padding: '16px 0 16px',
+    padding: '0 0 16px',
     flexDirection: 'column',
     gap: '16px'
   },

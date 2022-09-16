@@ -46,6 +46,10 @@ export const CustomInputNumber = ({
       clearInterval(i);
   };
   const onChangeInput = (text) => {
+    if (text === '') {
+      setTextValue(0);
+      return;
+    }
     const number = parseInt(text);
     if (max != undefined && number >= max)
       setTextValue(max);
@@ -56,6 +60,8 @@ export const CustomInputNumber = ({
   };
 
   useEffect(() => {
+    if (textValue === min || textValue === max)
+      clearTimer();
     inputRef.current.dispatchEvent(
       new Event("input", {
         detail: {
@@ -83,14 +89,15 @@ export const CustomInputNumber = ({
       </NumberButton>
       <TextField
         name={name}
-        disabled={disabled}
-        type={'number'}
+        disabled={(max != undefined && textValue >= max && min != undefined && textValue <= min) || disabled}
+
         className={classes.textField}
         value={textValue}
         inputProps={{
           ref: inputRef,
-          onInput: e => onChange(e),
-          onBlur: e => onBlur(e)
+          type: 'number',
+          onInput: e => parseInt(e.currentTarget.value) <= max && parseInt(e.currentTarget.value) >= min && onChange(e),
+          onBlur: e => parseInt(e.currentTarget.value) <= max && parseInt(e.currentTarget.value) >= min && onBlur(e)
         }}
         onChange={e => onChangeInput(e.currentTarget.value)} />
       <NumberButton

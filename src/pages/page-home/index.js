@@ -9,7 +9,7 @@ const STRINGS = {
 }
 
 export const PageHome = () => {
-  const [tabValue, setTavValue] = useState(1);
+  const [tabValue, setTavValue] = useState(0);
   const classes = useStyle();
   const HomeTabs = () => (
     <Tabs value={tabValue} onChange={(e, nextValue) => setTavValue(nextValue)} centered>
