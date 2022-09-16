@@ -25,7 +25,7 @@ export const PageHome = () => {
         <CustomInputNumber onChange={(e) => { }} onBlur={(e) => { }} name={'CustomInputNumber'} />
       </Box>
       <Box className={classes.box} sx={{ display: tabValue === 1 ? 'flex' : 'none' }}>
-        <RoomAllocation guest={10} room={4} onChange={value => { console.log(value) }} />
+        <RoomAllocation guest={10} room={4} onChange={value => { }} />
       </Box>
     </Box>)
 };

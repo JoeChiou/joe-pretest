@@ -53,16 +53,23 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
       <Box className={classes.list}>
         {
           rooms.map((room, index) => {
-            const total = Object.values(room).reduce((a, b) => a + b);
-            //total <=4 && total <= unassigned
+            const total = room.adult + room.child;
             const adultMax = (() => {
-              if (unassigned >= 0 && unassigned >= ROOM_CAN_LIVE)
+              if (unassigned >= ROOM_CAN_LIVE)
                 return ROOM_CAN_LIVE - room.child;
-              if (unassigned >= 0 && unassigned < ROOM_CAN_LIVE)
-                //the number unassigned+room.adult-total;
-                return unassigned + room.adult ;
+              else if (total < ROOM_CAN_LIVE && unassigned >= 0 && unassigned < ROOM_CAN_LIVE)
+                return unassigned + room.adult;
+              else if (total >= ROOM_CAN_LIVE)
+                return room.adult;
             })();
-            const childMax = (() => { })();
+            const childMax = (() => {
+              if (unassigned >= ROOM_CAN_LIVE)
+                return ROOM_CAN_LIVE - room.adult;
+              else if (total < ROOM_CAN_LIVE && unassigned >= 0 && unassigned < ROOM_CAN_LIVE)
+                return unassigned + room.child;
+              else if (total >= ROOM_CAN_LIVE)
+                return room.child;
+            })();
             return (
               <Box key={index} className={classes.listItem} >
                 <Typography variant='subtitle1'>{STRINGS['ROOM'].replace('[NUMBER]', total)}</Typography>
@@ -86,7 +93,7 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
                   </Grid>
                   <Grid container>
                     <Grid item md={6}>
-                      <Typography>{STRINGS['CHILDREN']}</Typography>
+                      <Typography variant='subtitle2'>{STRINGS['CHILDREN']}</Typography>
                     </Grid>
                     <Grid item md={6} className={classes.inputGrid}>
                       <CustomInputNumber
@@ -143,7 +150,7 @@ const useStyle = makeStyles({
   },
   inputGrid: {
     display: 'flex',
-    justifyContent: 'end'
+    justifyContent: 'flex-end',
   },
   listAdults: {
     display: 'flex',
