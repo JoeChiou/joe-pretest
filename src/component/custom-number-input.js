@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Box, Button, TextField } from "@mui/material";
 import { makeStyles } from "@material-ui/styles"
 import styled from "@emotion/styled";
@@ -11,73 +11,96 @@ const NumberButton = styled(Button)({
   padding: 0,
   minHeight: 0,
   minWidth: 0,
-})
+});
 
 export const CustomInputNumber = ({
   min = 0, max = 100, step = 1, value = 0,
   name = '',
   disabled = false,
-  onChange = () => { },
-  onBlur = () => { }
+  onChange,
+  onBlur
 }) => {
   const classes = useStyle();
-  const [textValue, setTextValue] = useState(value)
+  const [textValue, setTextValue] = useState(value);
   const [tid, setTid] = useState();
+  const inputRef = useRef(null);
 
-  const onButtonClick = (type) => {
-    switch (type) {
-      case '+':
-        if (!!max && textValue > max) return;
-        setTextValue(textValue + 1);
-        return;
-      case '-':
-        if (!!min && textValue < min) return;
-        setTextValue(textValue - 1);
-        return;
+  const textValueHandle = (type) => {
+    if (type === '+') {
+      setTextValue((preValue) => !!max && preValue > max ? preValue : preValue + step);
     }
-  }
-
+    if (type === '-') {
+      setTextValue((preValue) => min < step && preValue <= min ? min : preValue - step);
+    }
+  };
+  const onButtonClick = (type) => {
+    textValueHandle(type);
+  };
   const onButtonDown = (type) => {
-    if (type === '+')
-      setTid(setInterval(() => {
-        setTextValue((preValue) => preValue + step)
-      }, [200]))
-
-    if (type === '-')
-      setTid(setInterval(() => {
-        setTextValue((preValue) => preValue - step)
-      }, [200]))
-  }
-
-  const onButtonUp = () => {
     clearInterval(tid);
-  }
+    setTid(setInterval(() => {
+      textValueHandle(type)
+    }, [100]))
+  };
+  const clearTimer = () => {
+    clearInterval(tid);
+  };
+  const onChangeInput = (text) => {
+    const number = parseInt(text);
+    if (!!max && number >= max)
+      setTextValue(max);
+    else if (min != undefined && number <= min)
+      setTextValue(min);
+    else
+      setTextValue(number);
+  };
+
+  useEffect(() => {
+    inputRef.current.dispatchEvent(
+      new Event("input", {
+        detail: {
+          newValue: textValue,
+        },
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+  }, [textValue]);
 
   return (
-    <Box className={classes.box} name={name} >
+    <Box className={classes.box} onMouseLeave={() => {
+      inputRef.current.focus();
+      inputRef.current.blur();
+    }}>
       <NumberButton
         variant='outlined'
-        disabled={(!!min && textValue <= min) || disabled}
+        disabled={(min != undefined && textValue <= min) || disabled}
         onClick={() => onButtonClick('-')}
         onMouseDown={() => onButtonDown('-')}
-        onMouseUp={() => onButtonUp()}>
+        onMouseUp={() => clearTimer()}>
         <Remove />
       </NumberButton>
       <TextField
+        name={name}
         disabled={disabled}
         type={'number'}
         className={classes.textField}
         value={textValue}
-        onChange={(event) => setTextValue(parseInt(event.currentTarget.value))} />
+        inputProps={{
+          ref: inputRef,
+          onInput: e => onChange(e),
+          onBlur: e => onBlur(e)
+        }}
+        onChange={e => onChangeInput(e.currentTarget.value)} />
       <NumberButton
         variant='outlined'
         disabled={(!!max && textValue >= max) || disabled}
         onClick={() => onButtonClick('+')}
         onMouseDown={() => onButtonDown('+')}
-        onMouseUp={() => onButtonUp()}>
+        onMouseUp={() => clearTimer()}>
         <Add />
       </NumberButton>
-    </Box>
+    </Box >
   )
 };
 
@@ -85,8 +108,6 @@ const useStyle = makeStyles({
   box: {
     display: 'flex',
     maxWidth: 'fit-content',
-    border: '2px dashed grey',
-    padding: '10px',
     gap: '8px',
   },
   textField: {
