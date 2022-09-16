@@ -22,12 +22,11 @@ export const CustomInputNumber = ({
 }) => {
   const classes = useStyle();
   const [textValue, setTextValue] = useState(value);
-  const [tid, setTid] = useState();
   const inputRef = useRef(null);
 
   const textValueHandle = (type) => {
     if (type === '+') {
-      setTextValue((preValue) => !!max && preValue > max ? preValue : preValue + step);
+      setTextValue((preValue) => max != undefined && preValue >= max ? preValue : preValue + step);
     }
     if (type === '-') {
       setTextValue((preValue) => min < step && preValue <= min ? min : preValue - step);
@@ -37,17 +36,18 @@ export const CustomInputNumber = ({
     textValueHandle(type);
   };
   const onButtonDown = (type) => {
-    clearInterval(tid);
-    setTid(setInterval(() => {
+    clearTimer();
+    setInterval(() => {
       textValueHandle(type)
-    }, [100]))
+    }, [100])
   };
   const clearTimer = () => {
-    clearInterval(tid);
+    for (var i = 1; i < 99999; i++)
+      clearInterval(i);
   };
   const onChangeInput = (text) => {
     const number = parseInt(text);
-    if (!!max && number >= max)
+    if (max != undefined && number >= max)
       setTextValue(max);
     else if (min != undefined && number <= min)
       setTextValue(min);
@@ -77,7 +77,8 @@ export const CustomInputNumber = ({
         disabled={(min != undefined && textValue <= min) || disabled}
         onClick={() => onButtonClick('-')}
         onMouseDown={() => onButtonDown('-')}
-        onMouseUp={() => clearTimer()}>
+        onMouseUp={() => clearTimer()}
+        onMouseLeave={() => clearTimer()}>
         <Remove />
       </NumberButton>
       <TextField
@@ -94,10 +95,11 @@ export const CustomInputNumber = ({
         onChange={e => onChangeInput(e.currentTarget.value)} />
       <NumberButton
         variant='outlined'
-        disabled={(!!max && textValue >= max) || disabled}
+        disabled={(max != undefined && textValue >= max) || disabled}
         onClick={() => onButtonClick('+')}
         onMouseDown={() => onButtonDown('+')}
-        onMouseUp={() => clearTimer()}>
+        onMouseUp={() => clearTimer()}
+        onMouseLeave={() => clearTimer()}>
         <Add />
       </NumberButton>
     </Box >

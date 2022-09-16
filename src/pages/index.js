@@ -1,1 +1,1 @@
-export * from './page-room-allocation'
+export * from './page-home';
