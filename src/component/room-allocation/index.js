@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Box, Typography, Alert, Divider, ListItem, List, Grid } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, Grid } from '@mui/material';
 import { makeStyles } from '@material-ui/styles';
 import { CustomInputNumber } from '../custom-number-input';
 
 const STRINGS = {
-  COMSTOMER_NUMER: '住客人數: [NUMBER]',
+  COMSTOMER_NUMER: '住客人數: [NUMBER] 人',
   ROOM_NUMBER: '[NUMBER] 房',
   UNASSIGNED: '尚未分配人數: [NUMBER] 人',
   ROOM: '房間: [NUMBER] 人',
-  PER_PERSON: '人',
   ADULT: '大人',
   AGE_HINT: '年齡 20+',
   CHILDREN: '小孩'
@@ -35,6 +34,7 @@ export const RoomAllocation = ({ guest, room, onChange = (e) => { } }) => {
   const getRoomTotal = (room) => Object.values(room).reduce((a, b) => a + b)
 
   const getMax = (room, type) => {
+    if (type != 'adult' && type != 'child') return;
     const total = getRoomTotal(room);
     switch (type) {
       case 'adult':
@@ -53,6 +53,7 @@ export const RoomAllocation = ({ guest, room, onChange = (e) => { } }) => {
           return room.child;
     }
   }
+
   useEffect(() => {
     let assignedPeople = 0;
     rooms.forEach((room) => assignedPeople += getRoomTotal(room))
@@ -75,13 +76,13 @@ export const RoomAllocation = ({ guest, room, onChange = (e) => { } }) => {
       <Box className={classes.list}>
         {
           rooms.map((room, index) =>
-            <Box key={index} className={classes.listItem} >
-              <Typography variant='subtitle1'>{STRINGS['ROOM'].replace('[NUMBER]', getRoomTotal(room))}</Typography>
+            <Box key={index} className={classes.listItem}>
+              <Typography variant='h6'>{STRINGS['ROOM'].replace('[NUMBER]', getRoomTotal(room))}</Typography>
               <Box className={classes.gridContainer}>
                 <Grid container>
                   <Grid item xs={6} sm={6} md={6} >
-                    <Typography variant='subtitle2' >{STRINGS['ADULT']}</Typography>
-                    <Typography variant='caption'>{STRINGS['AGE_HINT']}</Typography>
+                    <Typography variant='subtitle1' >{STRINGS['ADULT']}</Typography>
+                    <Typography variant='caption' className={classes.ageHint}>{STRINGS['AGE_HINT']}</Typography>
                   </Grid>
                   <Grid item xs={6} sm={6} md={6} className={classes.inputGrid}>
                     <CustomInputNumber
@@ -97,7 +98,7 @@ export const RoomAllocation = ({ guest, room, onChange = (e) => { } }) => {
                 </Grid>
                 <Grid container>
                   <Grid item xs={6} sm={6} md={6} >
-                    <Typography variant='subtitle2'>{STRINGS['CHILDREN']}</Typography>
+                    <Typography variant='subtitle1'>{STRINGS['CHILDREN']}</Typography>
                   </Grid>
                   <Grid item xs={6} sm={6} md={6} className={classes.inputGrid}>
                     <CustomInputNumber
@@ -112,8 +113,7 @@ export const RoomAllocation = ({ guest, room, onChange = (e) => { } }) => {
                 </Grid>
               </Box>
             </Box>
-          )
-        }
+          )}
       </Box>
     </Box >
   )
@@ -153,6 +153,9 @@ const useStyle = makeStyles({
     gap: '16px',
     display: 'flex',
     flexDirection: 'column'
+  },
+  ageHint: {
+    color: '#a5a5a5'
   },
   inputGrid: {
     display: 'flex',
