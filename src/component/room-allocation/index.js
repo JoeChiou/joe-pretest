@@ -16,7 +16,7 @@ const STRINGS = {
 
 const ROOM_CAN_LIVE = 4;
 
-export const RoomAllocation = ({ guest, room, onChange }) => {
+export const RoomAllocation = ({ guest, room, onChange = (e) => { } }) => {
   const classes = useStyle();
   const [assigned, setAssigned] = useState(guest - room);
   const [rooms, setRooms] = useState(new Array(room).fill({ adult: 1, child: 0 }));
@@ -32,9 +32,30 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
     setRooms(nextRooms);
   }
 
+  const getRoomTotal = (room) => Object.values(room).reduce((a, b) => a + b)
+
+  const getMax = (room, type) => {
+    const total = getRoomTotal(room);
+    switch (type) {
+      case 'adult':
+        if (unassigned + total >= ROOM_CAN_LIVE)
+          return ROOM_CAN_LIVE - room.child;
+        else if (unassigned < ROOM_CAN_LIVE)
+          return unassigned + room.adult;
+        else if (total >= ROOM_CAN_LIVE)
+          return room.adult;
+      case 'child':
+        if (unassigned + total >= ROOM_CAN_LIVE)
+          return ROOM_CAN_LIVE - room.adult;
+        else if (unassigned < ROOM_CAN_LIVE)
+          return unassigned + room.child;
+        else if (total >= ROOM_CAN_LIVE)
+          return room.child;
+    }
+  }
   useEffect(() => {
     let assignedPeople = 0;
-    rooms.forEach((room) => assignedPeople += Object.values(room).reduce((a, b) => a + b))
+    rooms.forEach((room) => assignedPeople += getRoomTotal(room))
     setAssigned(assignedPeople)
     onChange(assignedPeople)
   }, [...rooms])
@@ -43,7 +64,7 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
     <Box className={classes.container} >
       <Typography variant='h6'>
         {STRINGS['COMSTOMER_NUMER'].replace('[NUMBER]', guest)}
-        &ensp;/&ensp;
+        &ensp;{'/'}&ensp;
         {STRINGS['ROOM_NUMBER'].replace('[NUMBER]', room)}
       </Typography>
       <Box visibility={unassigned > 0 ? 'visible' : 'hidden'}>
@@ -53,63 +74,44 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
       </Box>
       <Box className={classes.list}>
         {
-          rooms.map((room, index) => {
-            const total = room.adult + room.child;
-            const adultMax = (() => {
-              if (unassigned >= ROOM_CAN_LIVE)
-                return ROOM_CAN_LIVE - room.child;
-              else if (total < ROOM_CAN_LIVE && unassigned >= 0 && unassigned < ROOM_CAN_LIVE)
-                return unassigned + room.adult;
-              else if (total >= ROOM_CAN_LIVE)
-                return room.adult;
-            })();
-            const childMax = (() => {
-              if (unassigned >= ROOM_CAN_LIVE)
-                return ROOM_CAN_LIVE - room.adult;
-              else if (total < ROOM_CAN_LIVE && unassigned >= 0 && unassigned < ROOM_CAN_LIVE)
-                return unassigned + room.child;
-              else if (total >= ROOM_CAN_LIVE)
-                return room.child;
-            })();
-            return (
-              <Box key={index} className={classes.listItem} >
-                <Typography variant='subtitle1'>{STRINGS['ROOM'].replace('[NUMBER]', total)}</Typography>
-                <Box className={classes.gridContainer}>
-                  <Grid container>
-                    <Grid item xs={6} sm={6} md={6} >
-                      <Typography variant='subtitle2' >{STRINGS['ADULT']}</Typography>
-                      <Typography variant='caption'>{STRINGS['AGE_HINT']}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={6} md={6}  className={classes.inputGrid}>
-                      <CustomInputNumber
-                        name={'room' + index}
-                        value={room.adult}
-                        min={1}
-                        max={adultMax}
-                        disabled={isDisableInput}
-                        onChange={(e) => setChanges(room, index, 'adult', e.target.value)}
-                        onBlur={(e) => setChanges(room, index, 'adult', e.target.value)}
-                      />
-                    </Grid>
+          rooms.map((room, index) =>
+            <Box key={index} className={classes.listItem} >
+              <Typography variant='subtitle1'>{STRINGS['ROOM'].replace('[NUMBER]', getRoomTotal(room))}</Typography>
+              <Box className={classes.gridContainer}>
+                <Grid container>
+                  <Grid item xs={6} sm={6} md={6} >
+                    <Typography variant='subtitle2' >{STRINGS['ADULT']}</Typography>
+                    <Typography variant='caption'>{STRINGS['AGE_HINT']}</Typography>
                   </Grid>
-                  <Grid container>
-                    <Grid item xs={6} sm={6} md={6} >
-                      <Typography variant='subtitle2'>{STRINGS['CHILDREN']}</Typography>
-                    </Grid>
-                    <Grid item xs={6} sm={6} md={6}  className={classes.inputGrid}>
-                      <CustomInputNumber
-                        name={'room' + index}
-                        value={room.child}
-                        max={childMax}
-                        disabled={isDisableInput}
-                        onChange={(e) => setChanges(room, index, 'child', e.target.value)}
-                        onBlur={(e) => setChanges(room, index, 'child', e.target.value)}
-                      />
-                    </Grid>
+                  <Grid item xs={6} sm={6} md={6} className={classes.inputGrid}>
+                    <CustomInputNumber
+                      name={'room' + index + 'adult'}
+                      value={room.adult}
+                      min={1}
+                      max={getMax(room, 'adult')}
+                      disabled={isDisableInput}
+                      onChange={(e) => setChanges(room, index, 'adult', e.target.value)}
+                      onBlur={(e) => setChanges(room, index, 'adult', e.target.value)}
+                    />
                   </Grid>
-                </Box>
-              </Box>)
-          }
+                </Grid>
+                <Grid container>
+                  <Grid item xs={6} sm={6} md={6} >
+                    <Typography variant='subtitle2'>{STRINGS['CHILDREN']}</Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={6} md={6} className={classes.inputGrid}>
+                    <CustomInputNumber
+                      name={'room' + index + 'child'}
+                      value={room.child}
+                      max={getMax(room, 'child')}
+                      disabled={isDisableInput}
+                      onChange={(e) => setChanges(room, index, 'child', e.target.value)}
+                      onBlur={(e) => setChanges(room, index, 'child', e.target.value)}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
           )
         }
       </Box>
@@ -119,8 +121,8 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
 
 const useStyle = makeStyles({
   container: {
-    display:'flex',
-    flexDirection:'column',
+    display: 'flex',
+    flexDirection: 'column',
     minWidth: '50%',
     gap: '16px'
   },
