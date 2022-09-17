@@ -26,7 +26,7 @@ export const CustomInputNumber = ({
 
   const textValueHandle = (type) => {
     if (type === '+') {
-      setTextValue((preValue) => max != undefined && preValue >= max ? preValue : preValue + step);
+      setTextValue((preValue) => max != undefined && preValue >= max ? max : preValue + step);
     }
     if (type === '-') {
       setTextValue((preValue) => min < step && preValue <= min ? min : preValue - step);

@@ -37,7 +37,7 @@ export const RoomAllocation = ({ guest, room, onChange }) => {
     rooms.forEach((room) => assignedPeople += Object.values(room).reduce((a, b) => a + b))
     setAssigned(assignedPeople)
     onChange(assignedPeople)
-  }, [rooms])
+  }, [...rooms])
 
   return (
     <Box className={classes.container} >

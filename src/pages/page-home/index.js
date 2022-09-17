@@ -8,6 +8,9 @@ const STRINGS = {
   ROOMALLOCATION: 'RoomAllocation',
 }
 
+const GUEST = 10;
+const ROOMS = 3;
+
 export const PageHome = () => {
   const [tabValue, setTavValue] = useState(0);
   const classes = useStyle();
@@ -25,7 +28,7 @@ export const PageHome = () => {
         <CustomInputNumber onChange={(e) => { }} onBlur={(e) => { }} name={'CustomInputNumber'} />
       </Box>
       <Box className={classes.box} sx={{ display: tabValue === 1 ? 'flex' : 'none' }}>
-        <RoomAllocation guest={10} room={4} onChange={value => { }} />
+        <RoomAllocation guest={GUEST} room={ROOMS} onChange={value => { }} />
       </Box>
     </Box>)
 };
